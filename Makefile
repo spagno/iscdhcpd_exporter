@@ -11,53 +11,48 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include Makefile.common
+GO    := GO15VENDOREXPERIMENT=1 go
+PROMU := $(GOPATH)/bin/promu
+pkgs   = $(shell $(GO) list ./... | grep -v /vendor/)
 
-GO     ?= GO15VENDOREXPERIMENT=1 go
-GOARCH := $(shell $(GO) env GOARCH)
-GOHOSTARCH := $(shell $(GO) env GOHOSTARCH)
-
-PROMTOOL    ?= $(FIRST_GOPATH)/bin/promtool
-
+PREFIX                  ?= $(shell pwd)
+BIN_DIR                 ?= $(shell pwd)
 DOCKER_IMAGE_NAME       ?= iscdhcpd-exporter
-MACH                    ?= $(shell uname -m)
-DOCKERFILE              ?= Dockerfile
+DOCKER_IMAGE_TAG        ?= $(subst /,-,$(shell git rev-parse --abbrev-ref HEAD))
 
-STATICCHECK_IGNORE =
+all: format build test
 
-ifeq ($(OS),Windows_NT)
-    OS_detected := Windows
-else
-    OS_detected := $(shell uname -s)
-endif
+test:
+	@echo ">> running tests"
+	@$(GO) test -short $(pkgs)
 
-ifeq ($(GOHOSTARCH),amd64)
-	ifeq ($(OS_detected),$(filter $(OS_detected),Linux FreeBSD Darwin Windows))
-                # Only supported on amd64
-                test-flags := -race
-        endif
-endif
+style:
+	@echo ">> checking code style"
+	@! gofmt -d $(shell find . -path ./vendor -prune -o -name '*.go' -print) | grep '^'
 
-# By default, "cross" test with ourselves to cover unknown pairings.
-$(eval $(call goarch_pair,amd64,386))
-$(eval $(call goarch_pair,mips64,mips))
-$(eval $(call goarch_pair,mips64el,mipsel))
+format:
+	@echo ">> formatting code"
+	@$(GO) fmt $(pkgs)
 
-all: style vet staticcheck build test
+vet:
+	@echo ">> vetting code"
+	@$(GO) vet $(pkgs)
 
-.PHONY: docker
+build: promu
+	@echo ">> building binaries"
+	@$(PROMU) build --prefix $(PREFIX)
+
+tarball: promu
+	@echo ">> building release tarball"
+	@$(PROMU) tarball --prefix $(PREFIX) $(BIN_DIR)
+
 docker:
-ifeq ($(MACH), ppc64le)
-	$(eval DOCKERFILE=Dockerfile.ppc64le)
-endif
-	@echo ">> building docker image from $(DOCKERFILE)"
-	@docker build --file $(DOCKERFILE) -t "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)" .
+	@echo ">> building docker image"
+	@docker build -t "$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)" .
 
-.PHONY: test-docker
-test-docker:
-	@echo ">> testing docker image"
-	./test_image.sh "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)" 9367
+promu:
+	@GOOS=$(shell uname -s | tr A-Z a-z) \
+		GOARCH=$(subst x86_64,amd64,$(patsubst i%86,386,$(shell uname -m))) \
+		$(GO) get -u github.com/prometheus/promu
 
-.PHONY: promtool $(FIRST_GOPATH)/bin/promtool
-$(FIRST_GOPATH)/bin/promtool promtool:
-	@GOOS= GOARCH= $(GO) get -u github.com/prometheus/prometheus/cmd/promtool
+.PHONY: all style format build test vet tarball docker promu
