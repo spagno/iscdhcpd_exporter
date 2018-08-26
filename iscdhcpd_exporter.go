@@ -106,7 +106,7 @@ func NewExporter() *Exporter {
 		scrapeFailures: prometheus.NewCounter(prometheus.CounterOpts{
 			Namespace: namespace,
 			Name:      "exporter_scrape_failures_total",
-			Help:      "Number of errors while scraping apache.",
+			Help:      "Number of errors while scraping dhcpd-pools.",
 		}),
 	}
 }
