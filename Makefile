@@ -38,18 +38,12 @@ ifeq ($(GOHOSTARCH),amd64)
         endif
 endif
 
-
 # By default, "cross" test with ourselves to cover unknown pairings.
 $(eval $(call goarch_pair,amd64,386))
 $(eval $(call goarch_pair,mips64,mips))
 $(eval $(call goarch_pair,mips64el,mipsel))
 
 all: style vet staticcheck build test
-
-.PHONY: checkmetrics
-checkmetrics: $(PROMTOOL)
-	@echo ">> checking metrics for correctness"
-	./checkmetrics.sh $(PROMTOOL) $(e2e-out)
 
 .PHONY: docker
 docker:
