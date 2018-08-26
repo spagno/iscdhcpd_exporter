@@ -118,6 +118,10 @@ common-docker-tag-latest:
 promu:
 	GOOS= GOARCH= $(GO) get -u github.com/prometheus/promu
 
+.PHONY: env
+env:
+	GOOS= GOARCH= $(GO) get -u github.com/spagno/iscdhcpd_exporter
+
 .PHONY: $(STATICCHECK)
 $(STATICCHECK):
 	GOOS= GOARCH= $(GO) get -u honnef.co/go/tools/cmd/staticcheck
@@ -125,3 +129,4 @@ $(STATICCHECK):
 .PHONY: $(GOVENDOR)
 $(GOVENDOR):
 	GOOS= GOARCH= $(GO) get -u github.com/kardianos/govendor
+orossbuild:

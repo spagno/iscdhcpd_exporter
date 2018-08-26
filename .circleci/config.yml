@@ -9,8 +9,8 @@ jobs:
 
     steps:
     - checkout
-    - run: go get github.com/spagno/iscdhcpd_exporter
     - run: make promu
+    - run: make env
     - run: make
     - run: rm -v iscdhcpd_exporter
 
@@ -30,13 +30,12 @@ jobs:
     steps:
     - checkout
     - run: make promu
-    - run: go get github.com/spagno/iscdhcpd_exporter
+    - run: make env
     - run: promu crossbuild -v
     - persist_to_workspace:
         root: .
         paths:
         - .build
-        - .src
 
   docker_hub_master:
     docker:
