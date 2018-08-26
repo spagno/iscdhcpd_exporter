@@ -9,6 +9,7 @@ jobs:
 
     steps:
     - checkout
+    - run: go get github.com/spagno/iscdhcpd_exporter
     - run: make promu
     - run: make
     - run: rm -v iscdhcpd_exporter
@@ -28,6 +29,7 @@ jobs:
 
     steps:
     - checkout
+    - run: go get github.com/spagno/iscdhcpd_exporter
     - run: make promu
     - run: promu crossbuild -v
     - persist_to_workspace:
@@ -49,6 +51,7 @@ jobs:
     - setup_remote_docker
     - attach_workspace:
         at: .
+    - run: go get github.com/spagno/iscdhcpd_exporter
     - run: ln -s .build/linux-amd64/iscdhcpd_exporter iscdhcpd_exporter
     - run: make docker DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME
     - run: make docker DOCKER_IMAGE_NAME=$QUAY_IMAGE_NAME
@@ -75,6 +78,7 @@ jobs:
     - run: echo 'export PATH=${HOME}/bin:${PATH}' >> ${BASH_ENV}
     - attach_workspace:
         at: .
+    - run: go get github.com/spagno/iscdhcpd_exporter
     - run: make promu
     - run: promu crossbuild tarballs
     - run: promu checksum .tarballs
