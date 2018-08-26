@@ -5,7 +5,6 @@
 Prerequisites:
 
 * [Go compiler](https://golang.org/dl/)
-* RHEL/CentOS: `glibc-static` package.
 
 Building:
 
