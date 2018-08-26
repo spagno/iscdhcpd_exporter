@@ -34,11 +34,15 @@ const (
 )
 
 type Exporter struct {
-	summaryFree    *prometheus.Desc
-	summaryTouched *prometheus.Desc
-	summaryUsed    *prometheus.Desc
-	summaryDefined *prometheus.Desc
-	scrapeFailures prometheus.Counter
+	summaryFree     *prometheus.Desc
+	summaryTouched  *prometheus.Desc
+	summaryUsed     *prometheus.Desc
+	summaryDefined  *prometheus.Desc
+	specificFree    *prometheus.Desc
+	specificTouched *prometheus.Desc
+	specificUsed    *prometheus.Desc
+	specificDefined *prometheus.Desc
+	scrapeFailures  prometheus.Counter
 }
 
 type Subnet struct {
@@ -78,6 +82,22 @@ func NewExporter() *Exporter {
 			"IPs Defined",
 			nil,
 			nil),
+		specificFree: prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "free", "total"),
+			"IPs Defined", []string{"range"}, nil,
+		),
+		specificTouched: prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "touched", "total"),
+			"IPs Touched", []string{"range"}, nil,
+		),
+		specificUsed: prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "used", "total"),
+			"IPs Used", []string{"range"}, nil,
+		),
+		specificDefined: prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "defined", "total"),
+			"IPs Defined", []string{"range"}, nil,
+		),
 		scrapeFailures: prometheus.NewCounter(prometheus.CounterOpts{
 			Namespace: namespace,
 			Name:      "exporter_scrape_failures_total",
@@ -91,6 +111,10 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	ch <- e.summaryTouched
 	ch <- e.summaryUsed
 	ch <- e.summaryDefined
+	ch <- e.specificFree
+	ch <- e.specificTouched
+	ch <- e.specificUsed
+	ch <- e.specificDefined
 	e.scrapeFailures.Describe(ch)
 }
 
@@ -120,6 +144,12 @@ func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 	ch <- prometheus.MustNewConstMetric(e.summaryTouched, prometheus.CounterValue, outputPool.Summary.Touched)
 	ch <- prometheus.MustNewConstMetric(e.summaryUsed, prometheus.CounterValue, outputPool.Summary.Used)
 	ch <- prometheus.MustNewConstMetric(e.summaryDefined, prometheus.CounterValue, outputPool.Summary.Defined)
+	for subnet := 0; subnet < len(outputPool.Subnets); subnet++ {
+		ch <- prometheus.MustNewConstMetric(e.specificFree, prometheus.CounterValue, outputPool.Subnets[subnet].Free, outputPool.Subnets[subnet].Range)
+		ch <- prometheus.MustNewConstMetric(e.specificTouched, prometheus.CounterValue, outputPool.Subnets[subnet].Touched, outputPool.Subnets[subnet].Range)
+		ch <- prometheus.MustNewConstMetric(e.specificUsed, prometheus.CounterValue, outputPool.Subnets[subnet].Used, outputPool.Subnets[subnet].Range)
+		ch <- prometheus.MustNewConstMetric(e.specificDefined, prometheus.CounterValue, outputPool.Subnets[subnet].Defined, outputPool.Subnets[subnet].Range)
+	}
 	return nil
 }
 
