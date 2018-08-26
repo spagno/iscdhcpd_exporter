@@ -5,6 +5,7 @@
 Prerequisites:
 
 * [Go compiler](https://golang.org/dl/)
+* dhcpd-pools installed on the target server
 
 Building:
 
