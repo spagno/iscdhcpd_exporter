@@ -36,6 +36,6 @@ func checkPoolsStatus(t *testing.T, status string, metricCount int) {
 	}
 }
 
-func TestApache22Status(t *testing.T) {
+func TestPoolsStatus(t *testing.T) {
 	checkPoolsStatus(t, dhcpdPools, 16)
 }
