@@ -36,7 +36,7 @@ jobs:
         root: .
         paths:
         - .build
-        - src
+        - /go/src
 
   docker_hub_master:
     docker:
