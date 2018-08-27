@@ -24,4 +24,4 @@ To see all available configuration flags:
 
 [hub]: https://hub.docker.com/r/spagno/iscdhcpd-exporter/
 [circleci]: https://circleci.com/gh/spagno/iscdhcpd_exporter
-[goreportcard]: https://goreportcard.com/report/github.com/spagno/iscdhcpd-exporter
+[goreportcard]: https://goreportcard.com/report/github.com/spagno/iscdhcpd_exporter
