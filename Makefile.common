@@ -37,7 +37,7 @@ PREFIX                  ?= $(shell pwd)
 BIN_DIR                 ?= $(shell pwd)
 DOCKER_IMAGE_TAG        ?= $(subst /,-,$(shell git rev-parse --abbrev-ref HEAD))
 
-all: style staticcheck unused build test
+all: style staticcheck unused vendor build test
 
 style:
 	@echo ">> checking code style"
@@ -76,6 +76,10 @@ staticcheck: $(STATICCHECK)
 unused: $(GOVENDOR)
 	@echo ">> running check for unused packages"
 	@$(GOVENDOR) list +unused | grep . && exit 1 || echo 'No unused packages'
+
+vendor: $(GOVENDOR)
+	@echo ">> running govendor"
+	@$(GOVENDOR) init ; $(GOVENDOR) add +e
 
 build: promu
 	@echo ">> building binaries"
