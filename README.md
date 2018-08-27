@@ -2,7 +2,10 @@
 
 [![CircleCI](https://circleci.com/gh/spagno/iscdhcpd_exporter/tree/master.svg?style=shield)][circleci]
 [![Docker Pulls](https://img.shields.io/docker/pulls/spagno/iscdhcpd-exporter.svg?maxAge=604800)][hub]
-[![Go Report Card](https://goreportcard.com/badge/github.com/spagno/iscdhcpd_exporter)](https://goreportcard.com/report/github.com/spagno/iscdhcpd_exporter)
+[![Go Report Card](https://goreportcard.com/badge/github.com/spagno/iscdhcpd_exporter)][goreportcard]
+
+Prometheus exporter for isc dhcpd server exposed by \*NIX systems, written
+in Go.
 
 ## Building and running
 
