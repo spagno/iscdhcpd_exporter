@@ -14,12 +14,9 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
-	"io"
 	"net/http"
 	_ "net/http/pprof"
-	"os"
 	"os/exec"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -124,17 +121,13 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func getoutputPool() Lease {
-	var stdBuffer bytes.Buffer
-	outputPools := exec.Command("/usr/bin/dhcpd-pools", "-c", "/etc/dhcp/dhcpd.conf", "--leases=/var/lib/dhcp/dhcpd.leases", "-f", "j")
-	mw := io.MultiWriter(os.Stdout, &stdBuffer)
-	outputPools.Stdout = mw
-	err := outputPools.Run()
+	outputPools, err := exec.Command("/usr/bin/dhcpd-pools", "-c", "/etc/dhcp/dhcpd.conf", "--leases=/var/lib/dhcp/dhcpd.leases", "-f", "j").Output()
 	if err != nil {
 		log.Errorf("Error: %s", err)
 	}
 
 	var lease Lease
-	err = json.Unmarshal(stdBuffer.Bytes(), &lease)
+	err = json.Unmarshal(outputPools, &lease)
 
 	if err != nil {
 		log.Errorf("Error: %s", err)
