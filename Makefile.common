@@ -81,7 +81,8 @@ unused: $(GOVENDOR)
 vendor:
 	$(GO) get -u github.com/kardianos/govendor
 	@echo ">> running govendor"
-	@$(GOVENDOR) init ; $(GOVENDOR) add +e
+	$(GOVENDOR) init
+	$(GOVENDOR) add +e
 
 build: promu
 	@echo ">> building binaries"
