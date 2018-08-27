@@ -126,7 +126,7 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 
 func getoutputPool(if_test ToTest) Lease {
 	var (
-		err error
+		err         error
 		outputPools []byte
 	)
 	if len(if_test.Output) > 0 {
