@@ -79,6 +79,7 @@ unused: $(GOVENDOR)
 	@$(GOVENDOR) list +unused | grep . && exit 1 || echo 'No unused packages'
 
 vendor:
+	$(GO) get -u github.com/kardianos/govendor
 	@echo ">> running govendor"
 	@$(GOVENDOR) init ; $(GOVENDOR) add +e
 
