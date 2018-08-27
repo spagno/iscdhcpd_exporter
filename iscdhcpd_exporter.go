@@ -62,6 +62,10 @@ type Lease struct {
 	Summary        Subnet   `json:"summary"`
 }
 
+type ToTest struct {
+	Output []byte
+}
+
 func NewExporter() *Exporter {
 	return &Exporter{
 		summaryFree: prometheus.NewDesc(
@@ -120,10 +124,18 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	e.scrapeFailures.Describe(ch)
 }
 
-func getoutputPool() Lease {
-	outputPools, err := exec.Command("/usr/bin/dhcpd-pools", "-c", "/etc/dhcp/dhcpd.conf", "--leases=/var/lib/dhcp/dhcpd.leases", "-f", "j").Output()
-	if err != nil {
-		log.Errorf("Error: %s", err)
+func getoutputPool(if_test ToTest) Lease {
+	var (
+		err error
+		outputPools []byte
+	)
+	if len(if_test.Output) > 0 {
+		outputPools = if_test.Output
+	} else {
+		outputPools, err = exec.Command("/usr/bin/dhcpd-pools", "-c", "/etc/dhcp/dhcpd.conf", "--leases=/var/lib/dhcp/dhcpd.leases", "-f", "j").Output()
+		if err != nil {
+			log.Errorf("Error: %s", err)
+		}
 	}
 
 	var lease Lease
@@ -136,8 +148,8 @@ func getoutputPool() Lease {
 	return lease
 }
 
-func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
-	outputPool := getoutputPool()
+func (e *Exporter) collect(ch chan<- prometheus.Metric, if_test ToTest) error {
+	outputPool := getoutputPool(if_test)
 	ch <- prometheus.MustNewConstMetric(e.summaryFree, prometheus.CounterValue, outputPool.Summary.Free)
 	ch <- prometheus.MustNewConstMetric(e.summaryTouched, prometheus.CounterValue, outputPool.Summary.Touched)
 	ch <- prometheus.MustNewConstMetric(e.summaryUsed, prometheus.CounterValue, outputPool.Summary.Used)
@@ -152,7 +164,8 @@ func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
-	if err := e.collect(ch); err != nil {
+	var if_test ToTest
+	if err := e.collect(ch, if_test); err != nil {
 		log.Errorf("Error scraping dhcpd-pools: %s", err)
 		e.scrapeFailures.Inc()
 		e.scrapeFailures.Collect(ch)
