@@ -36,15 +36,19 @@ const (
 )
 
 type Exporter struct {
-	summaryFree     *prometheus.Desc
-	summaryTouched  *prometheus.Desc
-	summaryUsed     *prometheus.Desc
-	summaryDefined  *prometheus.Desc
-	specificFree    *prometheus.Desc
-	specificTouched *prometheus.Desc
-	specificUsed    *prometheus.Desc
-	specificDefined *prometheus.Desc
-	scrapeFailures  prometheus.Counter
+	summaryFree          *prometheus.Desc
+	summaryTouched       *prometheus.Desc
+	summaryUsed          *prometheus.Desc
+	summaryDefined       *prometheus.Desc
+	subnetFree           *prometheus.Desc
+	subnetTouched        *prometheus.Desc
+	subnetUsed           *prometheus.Desc
+	subnetDefined        *prometheus.Desc
+	sharedNetworkFree    *prometheus.Desc
+	sharedNetworkTouched *prometheus.Desc
+	sharedNetworkUsed    *prometheus.Desc
+	sharedNetworkDefined *prometheus.Desc
+	scrapeFailures       prometheus.Counter
 }
 
 type Subnet struct {
@@ -56,53 +60,77 @@ type Subnet struct {
 	Free     float64 `json:"free"`
 }
 
-type Lease struct {
-	Subnets        []Subnet `json:"subnets"`
-	SharedNetworks []string `json:"shared-networks"`
-	Summary        Subnet   `json:"summary"`
+type SharedNetwork struct {
+	Location string  `json:"location"`
+	Defined  float64 `json:"defined"`
+	Used     float64 `json:"used"`
+	Touched  float64 `json:"touched"`
+	Free     float64 `json:"free"`
+}
+
+type PoolsStats struct {
+	Subnets        []Subnet        `json:"subnets"`
+	SharedNetworks []SharedNetwork `json:"shared-networks"`
+	Summary        Subnet          `json:"summary"`
 }
 
 func NewExporter() *Exporter {
 	return &Exporter{
 		summaryFree: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "summary", "free_total"),
-			"IPs Free",
+			prometheus.BuildFQName(namespace, "summary", "free"),
+			"Overall IPs Free",
 			nil,
 			nil),
 		summaryTouched: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "summary", "touched_total"),
-			"IPs Touched",
+			prometheus.BuildFQName(namespace, "summary", "touched"),
+			"Overall IPs Touched",
 			nil,
 			nil),
 		summaryUsed: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "summary", "used_total"),
-			"IPs Used",
+			prometheus.BuildFQName(namespace, "summary", "used"),
+			"Overall IPs Used",
 			nil,
 			nil),
 		summaryDefined: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "summary", "defined_total"),
-			"IPs Defined",
+			prometheus.BuildFQName(namespace, "summary", "defined"),
+			"Overall IPs Defined",
 			nil,
 			nil),
-		specificFree: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "free", "total"),
-			"IPs Defined", []string{"range"}, nil,
+		subnetFree: prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "subnet", "free"),
+			"Subnet IPs Defined", []string{"location", "range"}, nil,
 		),
-		specificTouched: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "touched", "total"),
-			"IPs Touched", []string{"range"}, nil,
+		subnetTouched: prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "subnet", "touched"),
+			"Subnet IPs Touched", []string{"location", "range"}, nil,
 		),
-		specificUsed: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "used", "total"),
-			"IPs Used", []string{"range"}, nil,
+		subnetUsed: prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "subnet", "used"),
+			"Subnet IPs Used", []string{"location", "range"}, nil,
 		),
-		specificDefined: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "defined", "total"),
-			"IPs Defined", []string{"range"}, nil,
+		subnetDefined: prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "subnet", "defined"),
+			"Subnet IPs Defined", []string{"location", "range"}, nil,
+		),
+		sharedNetworkFree: prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "shared_network", "free"),
+			"Shared Network IPs Defined", []string{"location"}, nil,
+		),
+		sharedNetworkTouched: prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "shared_network", "touched"),
+			"Shared Network IPs Touched", []string{"location"}, nil,
+		),
+		sharedNetworkUsed: prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "shared_network", "used"),
+			"Shared Network IPs Used", []string{"location"}, nil,
+		),
+		sharedNetworkDefined: prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "shared_network", "defined"),
+			"Shared Network IPs Defined", []string{"location"}, nil,
 		),
 		scrapeFailures: prometheus.NewCounter(prometheus.CounterOpts{
 			Namespace: namespace,
-			Name:      "exporter_scrape_failures_total",
+			Name:      "exporter_scrape_failures",
 			Help:      "Number of errors while scraping dhcpd-pools.",
 		}),
 	}
@@ -113,41 +141,90 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	ch <- e.summaryTouched
 	ch <- e.summaryUsed
 	ch <- e.summaryDefined
-	ch <- e.specificFree
-	ch <- e.specificTouched
-	ch <- e.specificUsed
-	ch <- e.specificDefined
+
+	ch <- e.subnetFree
+	ch <- e.subnetTouched
+	ch <- e.subnetUsed
+	ch <- e.subnetDefined
+
+	ch <- e.sharedNetworkFree
+	ch <- e.sharedNetworkTouched
+	ch <- e.sharedNetworkUsed
+	ch <- e.sharedNetworkDefined
+
 	e.scrapeFailures.Describe(ch)
 }
 
-func getoutputPool() Lease {
+func getoutputPool() PoolsStats {
 	outputPools, err := exec.Command("/usr/bin/dhcpd-pools", "-c", "/etc/dhcp/dhcpd.conf", "--leases=/var/lib/dhcp/dhcpd.leases", "-f", "j").Output()
 	if err != nil {
 		log.Errorf("Error: %s", err)
 	}
 
-	var lease Lease
-	err = json.Unmarshal(outputPools, &lease)
+	var poolsStats PoolsStats
+	err = json.Unmarshal(outputPools, &poolsStats)
 
 	if err != nil {
 		log.Errorf("Error: %s", err)
 	}
 
-	return lease
+	return poolsStats
 }
 
 func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 	outputPool := getoutputPool()
-	ch <- prometheus.MustNewConstMetric(e.summaryFree, prometheus.CounterValue, outputPool.Summary.Free)
-	ch <- prometheus.MustNewConstMetric(e.summaryTouched, prometheus.CounterValue, outputPool.Summary.Touched)
-	ch <- prometheus.MustNewConstMetric(e.summaryUsed, prometheus.CounterValue, outputPool.Summary.Used)
-	ch <- prometheus.MustNewConstMetric(e.summaryDefined, prometheus.CounterValue, outputPool.Summary.Defined)
+
+	ch <- prometheus.MustNewConstMetric(
+		e.summaryFree, prometheus.GaugeValue, outputPool.Summary.Free,
+	)
+	ch <- prometheus.MustNewConstMetric(
+		e.summaryTouched, prometheus.GaugeValue, outputPool.Summary.Touched,
+	)
+	ch <- prometheus.MustNewConstMetric(
+		e.summaryUsed, prometheus.GaugeValue, outputPool.Summary.Used,
+	)
+	ch <- prometheus.MustNewConstMetric(
+		e.summaryDefined, prometheus.GaugeValue, outputPool.Summary.Defined,
+	)
+
 	for subnet := 0; subnet < len(outputPool.Subnets); subnet++ {
-		ch <- prometheus.MustNewConstMetric(e.specificFree, prometheus.CounterValue, outputPool.Subnets[subnet].Free, outputPool.Subnets[subnet].Range)
-		ch <- prometheus.MustNewConstMetric(e.specificTouched, prometheus.CounterValue, outputPool.Subnets[subnet].Touched, outputPool.Subnets[subnet].Range)
-		ch <- prometheus.MustNewConstMetric(e.specificUsed, prometheus.CounterValue, outputPool.Subnets[subnet].Used, outputPool.Subnets[subnet].Range)
-		ch <- prometheus.MustNewConstMetric(e.specificDefined, prometheus.CounterValue, outputPool.Subnets[subnet].Defined, outputPool.Subnets[subnet].Range)
+		ch <- prometheus.MustNewConstMetric(
+			e.subnetFree, prometheus.GaugeValue, outputPool.Subnets[subnet].Free,
+			outputPool.Subnets[subnet].Location, outputPool.Subnets[subnet].Range,
+		)
+		ch <- prometheus.MustNewConstMetric(
+			e.subnetTouched, prometheus.GaugeValue, outputPool.Subnets[subnet].Touched,
+			outputPool.Subnets[subnet].Location, outputPool.Subnets[subnet].Range,
+		)
+		ch <- prometheus.MustNewConstMetric(
+			e.subnetUsed, prometheus.GaugeValue, outputPool.Subnets[subnet].Used,
+			outputPool.Subnets[subnet].Location, outputPool.Subnets[subnet].Range,
+		)
+		ch <- prometheus.MustNewConstMetric(
+			e.subnetDefined, prometheus.GaugeValue, outputPool.Subnets[subnet].Defined,
+			outputPool.Subnets[subnet].Location, outputPool.Subnets[subnet].Range,
+		)
 	}
+
+	for sharedNetwork := 0; sharedNetwork < len(outputPool.SharedNetworks); sharedNetwork++ {
+		ch <- prometheus.MustNewConstMetric(
+			e.sharedNetworkFree, prometheus.GaugeValue, outputPool.SharedNetworks[sharedNetwork].Free,
+			outputPool.SharedNetworks[sharedNetwork].Location,
+		)
+		ch <- prometheus.MustNewConstMetric(
+			e.sharedNetworkTouched, prometheus.GaugeValue, outputPool.SharedNetworks[sharedNetwork].Touched,
+			outputPool.SharedNetworks[sharedNetwork].Location,
+		)
+		ch <- prometheus.MustNewConstMetric(
+			e.sharedNetworkUsed, prometheus.GaugeValue, outputPool.SharedNetworks[sharedNetwork].Used,
+			outputPool.SharedNetworks[sharedNetwork].Location,
+		)
+		ch <- prometheus.MustNewConstMetric(
+			e.sharedNetworkDefined, prometheus.GaugeValue, outputPool.SharedNetworks[sharedNetwork].Defined,
+			outputPool.SharedNetworks[sharedNetwork].Location,
+		)
+	}
+
 	return nil
 }
 
