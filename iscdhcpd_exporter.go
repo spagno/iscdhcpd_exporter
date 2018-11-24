@@ -174,23 +174,55 @@ func getoutputPool() PoolsStats {
 func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 	outputPool := getoutputPool()
 
-	ch <- prometheus.MustNewConstMetric(e.summaryFree, prometheus.GaugeValue, outputPool.Summary.Free)
-	ch <- prometheus.MustNewConstMetric(e.summaryTouched, prometheus.GaugeValue, outputPool.Summary.Touched)
-	ch <- prometheus.MustNewConstMetric(e.summaryUsed, prometheus.GaugeValue, outputPool.Summary.Used)
-	ch <- prometheus.MustNewConstMetric(e.summaryDefined, prometheus.GaugeValue, outputPool.Summary.Defined)
+	ch <- prometheus.MustNewConstMetric(
+		e.summaryFree, prometheus.GaugeValue, outputPool.Summary.Free,
+	)
+	ch <- prometheus.MustNewConstMetric(
+		e.summaryTouched, prometheus.GaugeValue, outputPool.Summary.Touched,
+	)
+	ch <- prometheus.MustNewConstMetric(
+		e.summaryUsed, prometheus.GaugeValue, outputPool.Summary.Used,
+	)
+	ch <- prometheus.MustNewConstMetric(
+		e.summaryDefined, prometheus.GaugeValue, outputPool.Summary.Defined,
+	)
 
 	for subnet := 0; subnet < len(outputPool.Subnets); subnet++ {
-		ch <- prometheus.MustNewConstMetric(e.subnetFree, prometheus.GaugeValue, outputPool.Subnets[subnet].Free, outputPool.Subnets[subnet].Location, outputPool.Subnets[subnet].Range)
-		ch <- prometheus.MustNewConstMetric(e.subnetTouched, prometheus.GaugeValue, outputPool.Subnets[subnet].Touched, outputPool.Subnets[subnet].Location, outputPool.Subnets[subnet].Range)
-		ch <- prometheus.MustNewConstMetric(e.subnetUsed, prometheus.GaugeValue, outputPool.Subnets[subnet].Used, outputPool.Subnets[subnet].Location, outputPool.Subnets[subnet].Range)
-		ch <- prometheus.MustNewConstMetric(e.subnetDefined, prometheus.GaugeValue, outputPool.Subnets[subnet].Defined, outputPool.Subnets[subnet].Location, outputPool.Subnets[subnet].Range)
+		ch <- prometheus.MustNewConstMetric(
+			e.subnetFree, prometheus.GaugeValue, outputPool.Subnets[subnet].Free,
+			outputPool.Subnets[subnet].Location, outputPool.Subnets[subnet].Range,
+		)
+		ch <- prometheus.MustNewConstMetric(
+			e.subnetTouched, prometheus.GaugeValue, outputPool.Subnets[subnet].Touched,
+			outputPool.Subnets[subnet].Location, outputPool.Subnets[subnet].Range,
+		)
+		ch <- prometheus.MustNewConstMetric(
+			e.subnetUsed, prometheus.GaugeValue, outputPool.Subnets[subnet].Used,
+			outputPool.Subnets[subnet].Location, outputPool.Subnets[subnet].Range,
+		)
+		ch <- prometheus.MustNewConstMetric(
+			e.subnetDefined, prometheus.GaugeValue, outputPool.Subnets[subnet].Defined,
+			outputPool.Subnets[subnet].Location, outputPool.Subnets[subnet].Range,
+		)
 	}
 
 	for sharedNetwork := 0; sharedNetwork < len(outputPool.SharedNetworks); sharedNetwork++ {
-		ch <- prometheus.MustNewConstMetric(e.sharedNetworkFree, prometheus.GaugeValue, outputPool.SharedNetworks[sharedNetwork].Free, outputPool.SharedNetworks[sharedNetwork].Location)
-		ch <- prometheus.MustNewConstMetric(e.sharedNetworkTouched, prometheus.GaugeValue, outputPool.SharedNetworks[sharedNetwork].Touched, outputPool.SharedNetworks[sharedNetwork].Location)
-		ch <- prometheus.MustNewConstMetric(e.sharedNetworkUsed, prometheus.GaugeValue, outputPool.SharedNetworks[sharedNetwork].Used, outputPool.SharedNetworks[sharedNetwork].Location)
-		ch <- prometheus.MustNewConstMetric(e.sharedNetworkDefined, prometheus.GaugeValue, outputPool.SharedNetworks[sharedNetwork].Defined, outputPool.SharedNetworks[sharedNetwork].Location)
+		ch <- prometheus.MustNewConstMetric(
+			e.sharedNetworkFree, prometheus.GaugeValue, outputPool.SharedNetworks[sharedNetwork].Free,
+			outputPool.SharedNetworks[sharedNetwork].Location,
+		)
+		ch <- prometheus.MustNewConstMetric(
+			e.sharedNetworkTouched, prometheus.GaugeValue, outputPool.SharedNetworks[sharedNetwork].Touched,
+			outputPool.SharedNetworks[sharedNetwork].Location,
+		)
+		ch <- prometheus.MustNewConstMetric(
+			e.sharedNetworkUsed, prometheus.GaugeValue, outputPool.SharedNetworks[sharedNetwork].Used,
+			outputPool.SharedNetworks[sharedNetwork].Location,
+		)
+		ch <- prometheus.MustNewConstMetric(
+			e.sharedNetworkDefined, prometheus.GaugeValue, outputPool.SharedNetworks[sharedNetwork].Defined,
+			outputPool.SharedNetworks[sharedNetwork].Location,
+		)
 	}
 
 	return nil
