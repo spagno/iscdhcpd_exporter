@@ -188,29 +188,29 @@ func getDhcpdStatus() (status int) {
 	status = 0
 	strPid, err := ioutil.ReadFile(*dhcpdPidFile)
 	if err != nil {
-		log.Errorf("Unable to read DHCPD PID file: %s", err)
+		log.Debugf("Unable to read DHCPD PID file: %s", err)
 		return
 	}
 
 	pid, err := strconv.Atoi(strings.Trim(string(strPid), "\n"))
 	if err != nil {
-		log.Errorf("Unable to convert DHCP PID to integer: %s", err)
+		log.Debugf("Unable to convert DHCP PID to integer: %s", err)
 		return
 	}
 	log.Debugf("Read PID from dhcpd pid file: %d", pid)
 
 	proc, err := os.FindProcess(pid)
 	if err != nil {
-		log.Errorf("Unknown error when retrieving process %d info: %s", pid, err)
+		log.Debugf("Unknown error when retrieving process %d info: %s", pid, err)
 		return
 	}
 
 	if err = proc.Signal(syscall.Signal(0)); err != nil {
-		log.Errorf("DHCP process at PID %d is not running: %s", pid, err)
+		log.Debugf("DHCP process at PID %d is not running: %s", pid, err)
 		return
 	}
 	status = 1
-	log.Infof("DHCP process with PID %d is running", pid)
+	log.Debugf("DHCP process with PID %d is running", pid)
 	return
 }
 
