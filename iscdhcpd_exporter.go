@@ -32,15 +32,17 @@ import (
 )
 
 var (
-	listenAddress = kingpin.Flag("web.listen-address", "Address on which to expose metrics and web interface.").Default(":9367").String()
-	metricsPath   = kingpin.Flag("web.telemetry-path", "Path under which to expose metrics.").Default("/metrics").String()
-	dhcpdPidFile  = kingpin.Flag("dhcpd.pid-file", "Path where dhcpd PID file is located.").Default("/var/run/dhcpd.pid").String()
+	listenAddress   = kingpin.Flag("web.listen-address", "Address on which to expose metrics and web interface.").Default(":9367").String()
+	metricsPath     = kingpin.Flag("web.telemetry-path", "Path under which to expose metrics.").Default("/metrics").String()
+	dhcpdPidFile    = kingpin.Flag("dhcpd.pid-file", "Path where dhcpd PID file is located.").Default("/var/run/dhcpd.pid").String()
+	dhcpdLeasesFile = kingpin.Flag("dhcpd.leases-file", "dhcpd.leases file.").Default("/var/lib/dhcp/dhcpd.leases").String()
 )
 
 const (
 	namespace = "iscdhcpd"
 )
 
+// Metrics
 type Exporter struct {
 	summaryFree          *prometheus.Desc
 	summaryTouched       *prometheus.Desc
@@ -58,6 +60,7 @@ type Exporter struct {
 	scrapeFailures       prometheus.Counter
 }
 
+// Subnet struct
 type Subnet struct {
 	Location string  `json:"location"`
 	Range    string  `json:"range"`
@@ -67,6 +70,7 @@ type Subnet struct {
 	Free     float64 `json:"free"`
 }
 
+// SharedNetwork struct
 type SharedNetwork struct {
 	Location string  `json:"location"`
 	Defined  float64 `json:"defined"`
@@ -75,12 +79,14 @@ type SharedNetwork struct {
 	Free     float64 `json:"free"`
 }
 
+// PoolsStats struct
 type PoolsStats struct {
 	Subnets        []Subnet        `json:"subnets"`
 	SharedNetworks []SharedNetwork `json:"shared-networks"`
 	Summary        Subnet          `json:"summary"`
 }
 
+// NewExporter function
 func NewExporter() *Exporter {
 	return &Exporter{
 		summaryFree: prometheus.NewDesc(
@@ -148,6 +154,7 @@ func NewExporter() *Exporter {
 	}
 }
 
+// Describe function
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	ch <- e.summaryFree
 	ch <- e.summaryTouched
@@ -169,7 +176,7 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func getoutputPool() PoolsStats {
-	outputPools, err := exec.Command("/usr/bin/dhcpd-pools", "-c", "/etc/dhcp/dhcpd.conf", "--leases=/var/lib/dhcp/dhcpd.leases", "-f", "j").Output()
+	outputPools, err := exec.Command("/usr/bin/dhcpd-pools", "-c", "/etc/dhcp/dhcpd.conf", "--leases="+*dhcpdLeasesFile, "-f", "j").Output()
 	if err != nil {
 		log.Errorf("Error: %s", err)
 	}
@@ -274,6 +281,7 @@ func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 	return nil
 }
 
+// Collect function
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	if err := e.collect(ch); err != nil {
 		log.Errorf("Error scraping dhcpd-pools: %s", err)
