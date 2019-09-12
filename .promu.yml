@@ -33,9 +33,6 @@ crossbuild:
         - freebsd/arm
         - openbsd/arm
         - netbsd/arm
-        - aix/ppc64
-        - linux/ppc64
-        - linux/ppc64le
         - linux/mips64
         - linux/mips64le
         - linux/s390x
