@@ -280,7 +280,6 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		e.scrapeFailures.Inc()
 		e.scrapeFailures.Collect(ch)
 	}
-	return
 }
 
 func init() {
