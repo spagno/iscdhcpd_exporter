@@ -76,7 +76,7 @@ staticcheck: $(STATICCHECK)
 
 unused: $(GOVENDOR)
 	@echo ">> running check for unused packages"
-	@$(GOVENDOR) list +unused | grep . && exit 1
+	@$(GOVENDOR) list +unused | grep . && exit 1 || echo "Ok"
 
 build: promu
 	@echo ">> building binaries"

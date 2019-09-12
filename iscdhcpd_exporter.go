@@ -42,7 +42,7 @@ const (
 	namespace = "iscdhcpd"
 )
 
-// Metrics
+// Exporter struct
 type Exporter struct {
 	summaryFree          *prometheus.Desc
 	summaryTouched       *prometheus.Desc
