@@ -18,7 +18,7 @@ include Makefile.common
 STATICCHECK_IGNORE = \
   github.com/prometheus/iscdhcpd_exporter/iscdhcpd_exporter.go:SA1019
 
-DOCKER_IMAGE_NAME ?= homecentr/iscdhcpd-exporter
+DOCKER_IMAGE_NAME ?= spagno/iscdhcpd-exporter
 
 test-docker:
 	@echo ">> testing docker image"
