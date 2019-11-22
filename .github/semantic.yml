@@ -1,0 +1,11 @@
+titleOnly: true
+types:
+  - feat
+  - fix
+  - docs
+  - refactor
+  - test
+  - build
+  - ci
+  - chore
+  - revert

@@ -15,14 +15,14 @@ package main
 
 import (
 	"encoding/json"
-	//"io/ioutil"
+	"io/ioutil"
 	"net/http"
 	_ "net/http/pprof"
-	//"os"
+	"os"
 	"os/exec"
-	//"strconv"
-	//"strings"
-	//"syscall"
+	"strconv"
+	"strings"
+	"syscall"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -56,7 +56,7 @@ type Exporter struct {
 	sharedNetworkTouched *prometheus.Desc
 	sharedNetworkUsed    *prometheus.Desc
 	sharedNetworkDefined *prometheus.Desc
-	//dhcpdUp              *prometheus.Desc
+	dhcpdUp              *prometheus.Desc
 	scrapeFailures       prometheus.Counter
 }
 
@@ -137,11 +137,11 @@ func NewExporter() *Exporter {
 			prometheus.BuildFQName(namespace, "shared_network", "defined"),
 			"Shared Network IPs Defined", []string{"location"}, nil,
 		),
-		// dhcpdUp: prometheus.NewDesc(
-		// 	prometheus.BuildFQName(namespace, "process", "up"),
-		// 	"Whether dhcpd daemon is running at PID defined at its pid-file.",
-		// 	[]string{}, nil,
-		// ),
+		dhcpdUp: prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "process", "up"),
+			"Whether dhcpd daemon is running at PID defined at its pid-file.",
+			[]string{}, nil,
+		),
 		scrapeFailures: prometheus.NewCounter(prometheus.CounterOpts{
 			Namespace: namespace,
 			Name:      "exporter_scrape_failures",
@@ -165,7 +165,7 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	ch <- e.sharedNetworkTouched
 	ch <- e.sharedNetworkUsed
 	ch <- e.sharedNetworkDefined
-	//ch <- e.dhcpdUp
+	ch <- e.dhcpdUp
 
 	e.scrapeFailures.Describe(ch)
 }
@@ -186,40 +186,40 @@ func getoutputPool() PoolsStats {
 	return poolsStats
 }
 
-// func getDhcpdStatus() (status int) {
-// 	status = 0
-// 	strPid, err := ioutil.ReadFile(*dhcpdPidFile)
-// 	if err != nil {
-// 		log.Debugf("Unable to read DHCPD PID file: %s", err)
-// 		return
-// 	}
+func getDhcpdStatus() (status int) {
+	status = 0
+	strPid, err := ioutil.ReadFile(*dhcpdPidFile)
+	if err != nil {
+		log.Debugf("Unable to read DHCPD PID file: %s", err)
+		return
+	}
 
-// 	pid, err := strconv.Atoi(strings.Trim(string(strPid), "\n"))
-// 	if err != nil {
-// 		log.Debugf("Unable to convert DHCP PID to integer: %s", err)
-// 		return
-// 	}
-// 	log.Debugf("Read PID from dhcpd pid file: %d", pid)
+	pid, err := strconv.Atoi(strings.Trim(string(strPid), "\n"))
+	if err != nil {
+		log.Debugf("Unable to convert DHCP PID to integer: %s", err)
+		return
+	}
+	log.Debugf("Read PID from dhcpd pid file: %d", pid)
 
-// 	proc, err := os.FindProcess(pid)
-// 	if err != nil {
-// 		log.Debugf("Unknown error when retrieving process %d info: %s", pid, err)
-// 		return
-// 	}
+	proc, err := os.FindProcess(pid)
+	if err != nil {
+		log.Debugf("Unknown error when retrieving process %d info: %s", pid, err)
+		return
+	}
 
-// 	if err = proc.Signal(syscall.Signal(0)); err != nil {
-// 		log.Debugf("DHCP process at PID %d is not running: %s", pid, err)
-// 		return
-// 	}
-// 	status = 1
-// 	log.Debugf("DHCP process with PID %d is running", pid)
-// 	return
-// }
+	if err = proc.Signal(syscall.Signal(0)); err != nil {
+		log.Debugf("DHCP process at PID %d is not running: %s", pid, err)
+		return
+	}
+	status = 1
+	log.Debugf("DHCP process with PID %d is running", pid)
+	return
+}
 
 func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
-	// ch <- prometheus.MustNewConstMetric(
-	// 	e.dhcpdUp, prometheus.GaugeValue, float64(0), //getDhcpdStatus()),
-	// )
+	ch <- prometheus.MustNewConstMetric(
+		e.dhcpdUp, prometheus.GaugeValue, float64(getDhcpdStatus()),
+	)
 	outputPool := getoutputPool()
 
 	ch <- prometheus.MustNewConstMetric(

@@ -28,7 +28,7 @@ docker_cleanup() {
 }
 
 if [[ "$#" -ne 2 ]] ; then
-    echo "Usage: $0 spagno/iscdhcpd-exporter:v0.1.1 9367" >&2
+    echo "Usage: $0 spagno/iscdhcpd_exporter:v0.1.1 9367" >&2
     exit 1
 fi
 

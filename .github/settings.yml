@@ -1,0 +1,35 @@
+# https://developer.github.com/v3/repos/#edit
+repository:
+  name: fork-iscdhcpd-exporter
+  description: "Fork or a Prometheus exporter for ISC DHCP server with minor customization to fit into HomeCentr container"
+  homepage: https://homecentr.github.io/
+  private: false
+  has_issues: true
+  has_wiki: false
+  has_downloads: false
+  has_projects: false
+  archived: false
+
+  default_branch: master
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_rebase_merge: false
+
+# https://developer.github.com/v3/repos/branches/#update-branch-protection
+branches:
+  - name: master
+    protection:
+      required_status_checks:
+        strict: true
+        contexts: [ ".github/workflows/ci.yml" ]
+      required_pull_request_reviews: null
+      enforce_admins: false
+      restrictions:
+
+labels:
+  - name: bug
+    color: d73a4a
+  - name: feature
+    color: a2eeef
+  - name: question
+    color: d876e3
