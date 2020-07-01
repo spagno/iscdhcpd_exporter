@@ -1,0 +1,74 @@
+name: CI/CD on master
+on:
+  push:
+    branches:
+      - master
+
+env:
+  IMAGE_NAME: "homecentr/dhcp-exporter"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Set up java for tests execution
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: "Determine release version"
+        uses: codfish/semantic-release-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify Dockerfile with Hadolint
+        uses: brpaz/hadolint-action@master
+
+      - name: "Build Docker image"
+        if: env.RELEASE_VERSION != ''
+        run: |
+          docker build . -t "$IMAGE_NAME:$RELEASE_VERSION" \
+              --label "org.label-schema.schema-version=1.0" \
+              --label "org.label-schema.vcs-ref=${GITHUB_SHA}" \
+              --label "org.label-schema.vcs-url=https://github.com/${GITHUB_REPOSITORY}" \
+              --label "org.label-schema.url=https://github.com/${GITHUB_REPOSITORY}" \
+              --label "org.label-schema.vendor=HomeCentr" \
+              --label "version=$RELEASE_VERSION" \
+              --label "org.label-schema.build-date=$(date '+%F %T')"
+
+      - name: Test Docker image
+        if: env.RELEASE_VERSION != ''
+        run: cd tests && sudo gradle test -Ddocker_image_tag=${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
+      
+      - name: Scan with Phonito Security
+        if: env.RELEASE_VERSION != ''
+        uses: phonito/phonito-scanner-action@master
+        with:
+          image: ${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
+          phonito-token: '${{ secrets.PHONITO_TOKEN }}'
+
+      - name: "Tag image as latest"
+        if: env.RELEASE_VERSION != ''
+        run: "docker tag $IMAGE_NAME:$RELEASE_VERSION $IMAGE_NAME:latest"
+
+      - name: "Log into Docker Hub"
+        if: env.RELEASE_VERSION != ''
+        run: "echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin"
+
+      - name: "Push versioned image"
+        if: env.RELEASE_VERSION != ''
+        run: "docker push $IMAGE_NAME:$RELEASE_VERSION"
+
+      - name: "Push latest image"
+        if: env.RELEASE_VERSION != ''
+        run: "docker push $IMAGE_NAME:latest"
+
+      - name: "Update Docker Hub description"
+        if: env.RELEASE_VERSION != ''
+        uses: peter-evans/dockerhub-description@v2.2.0
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+          DOCKERHUB_REPOSITORY: ${{ env.IMAGE_NAME }}

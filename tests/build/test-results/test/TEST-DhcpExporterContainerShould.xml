@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="DhcpExporterContainerShould" tests="1" skipped="0" failures="0" errors="0" timestamp="2020-07-01T14:07:10" hostname="PRG012407" time="0.032">
+  <properties/>
+  <testcase name="reportMetrics" classname="DhcpExporterContainerShould" time="0.032"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[[Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy - Loaded org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+[Test worker] INFO org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy - Accessing docker with local Npipe socket (npipe:////./pipe/docker_engine)
+[Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy - Found Docker environment with local Npipe socket (npipe:////./pipe/docker_engine)
+[Test worker] INFO org.testcontainers.DockerClientFactory - Docker host IP address is localhost
+[Test worker] INFO org.testcontainers.DockerClientFactory - Connected to docker: 
+  Server Version: 19.03.8
+  API Version: 1.40
+  Operating System: Docker Desktop
+  Total Memory: 1967 MB
+[Test worker] INFO org.testcontainers.DockerClientFactory - Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+[Test worker] INFO org.testcontainers.DockerClientFactory - Checking the system...
+[Test worker] INFO org.testcontainers.DockerClientFactory - ?? Docker server version should be at least 1.6.0
+[Test worker] INFO org.testcontainers.DockerClientFactory - ?? Docker environment should have more than 2GB free disk space
+[Test worker] INFO docker[homecentr/dhcp-exporter:local] - Creating container for image: homecentr/dhcp-exporter:local
+[Test worker] INFO docker[homecentr/dhcp-exporter:local] - Starting container with ID: 9dbe21cb95d347d97c506f7827b4b2bd187ceb47869bfd8f796338af986809b1
+[Test worker] INFO docker[homecentr/dhcp-exporter:local] - Container homecentr/dhcp-exporter:local is starting: 9dbe21cb95d347d97c506f7827b4b2bd187ceb47869bfd8f796338af986809b1
+[Test worker] INFO docker[homecentr/dhcp-exporter:local] - Container homecentr/dhcp-exporter:local started in PT4.5409081S
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: [s6-init] making user provided files available at /var/run/s6/etc...exited 0.
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: [s6-init] ensuring user provided files have correct perms...exited 0.
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: [fix-attrs.d] applying ownership & permissions fixes...
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: [fix-attrs.d] done.
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: [cont-init.d] executing container initialization scripts...
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: [cont-init.d] 01-env.sh: executing... 
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: [cont-init.d] 01-env.sh: exited 0.
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: [cont-init.d] 10-init.sh: executing... 
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: 
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT:     __  __                                     __
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT:    / / / /___  ____ ___  ___  ________  ____  / /______
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT:   / /_/ / __ \/ __ `__ \/ _ \/ ___/ _ \/ __ \/ __/ ___/
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT:  / __  / /_/ / / / / / /  __/ /__/  __/ / / / /_/ /    
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: /_/ /_/\____/_/ /_/ /_/\___/\___/\___/_/ /_/\__/_/     
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: 
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: 
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: -------------------------------------
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: User uid:    7077
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: User gid:    7077
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: -------------------------------------
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: 
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: [cont-init.d] 10-init.sh: exited 0.
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: [cont-init.d] done.
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: [services.d] starting services
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDOUT: [services.d] done.
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDERR: time="2020-07-01T14:07:10Z" level=info msg="Starting iscdhcpd_exporter (version=0.1.4, branch=chore/tf, revision=d51db2acd7349facb3b85855d8c9f67121ee77f1)" source="iscdhcpd-exporter.go:308"
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDERR: time="2020-07-01T14:07:10Z" level=info msg="Build context (go=go1.14.4, user=root@91eb5b792a9f, date=10780816-00:78:00)" source="iscdhcpd-exporter.go:309"
+[tc-okhttp-stream-573485791] INFO DhcpExporterContainerShould - STDERR: time="2020-07-01T14:07:10Z" level=info msg="Listening on :9367" source="iscdhcpd-exporter.go:315"
+]]></system-err>
+</testsuite>

@@ -1,0 +1,10 @@
+version: "3.7"
+services:
+  dhcp-exporter:
+    build: .
+    image: homecentr/dhcp-exporter:local
+    volumes:
+      - ./example/config:/config
+      - ./example/leases:/leases
+    ports:
+      - 9367:9367

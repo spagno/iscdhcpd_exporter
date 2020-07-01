@@ -1,7 +1,7 @@
 go:
     cgo: true
 repository:
-    path: github.com/homecentr/iscdhcpd_exporter
+    path: github.com/homecentr/docker-dhcp-exporter
 build:
     flags: -a -tags netgo
     ldflags: |
