@@ -3,3 +3,4 @@ iscdhcpd_exporter
 *.swp
 .vscode
 .tarballs
+*.bak
