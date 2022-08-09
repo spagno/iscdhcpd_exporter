@@ -1,7 +1,8 @@
 go:
-    # Whenever the Go version is updated here,
-    # .circle/config.yml should also be updated.
+    # Whenever the Go version is updated here, .circle/config.yml and
+    # .promu.yml should also be updated.
     version: 1.18
+    cgo: true
 repository:
     path: github.com/spagno/iscdhcpd_exporter
 build:
@@ -19,5 +20,7 @@ tarball:
         - LICENSE
 crossbuild:
     platforms:
-        - linux
-        - openbsd/amd64
+        - darwin/amd64
+        - darwin/arm64
+        - netbsd/amd64
+        - netbsd/386

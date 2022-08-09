@@ -1,6 +1,6 @@
 # ISC-DHCPD exporter
 
-[![CircleCI](https://circleci.com/gh/spagno/iscdhcpd_exporter/tree/master.svg?style=shield)][circleci]
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/spagno/iscdhcpd_exporter/tree/master.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/spagno/iscdhcpd_exporter/tree/master)
 [![Docker Pulls](https://img.shields.io/docker/pulls/spagno/iscdhcpd-exporter.svg?maxAge=604800)][hub]
 [![Go Report Card](https://goreportcard.com/badge/github.com/spagno/iscdhcpd_exporter)][goreportcard]
 

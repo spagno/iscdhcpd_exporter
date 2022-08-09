@@ -26,8 +26,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/version"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -90,22 +90,22 @@ type PoolsStats struct {
 func NewExporter() *Exporter {
 	return &Exporter{
 		summaryFree: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "summary", "free"),
+			prometheus.BuildFQName(namespace, "sum", "free"),
 			"Overall IPs Free",
 			nil,
 			nil),
 		summaryTouched: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "summary", "touched"),
+			prometheus.BuildFQName(namespace, "sum", "touched"),
 			"Overall IPs Touched",
 			nil,
 			nil),
 		summaryUsed: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "summary", "used"),
+			prometheus.BuildFQName(namespace, "sum", "used"),
 			"Overall IPs Used",
 			nil,
 			nil),
 		summaryDefined: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "summary", "defined"),
+			prometheus.BuildFQName(namespace, "sum", "defined"),
 			"Overall IPs Defined",
 			nil,
 			nil),
@@ -295,7 +295,6 @@ func init() {
 }
 
 func main() {
-	log.AddFlags(kingpin.CommandLine)
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
 
@@ -315,7 +314,10 @@ func main() {
 
 	http.Handle(*metricsPath, promhttp.Handler())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write(landingPage)
+		_, err := w.Write(landingPage)
+		if err != nil {
+			log.Fatal(err)
+		}
 	})
 	log.Infoln("Listening on", *listenAddress)
 	err := http.ListenAndServe(*listenAddress, nil)

@@ -2,3 +2,4 @@ iscdhcpd_exporter
 .build
 *.swp
 .vscode
+.tarballs
