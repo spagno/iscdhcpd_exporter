@@ -1,6 +1,6 @@
 go:
     cgo: true
-    version: 1.13
+    version: 1.18
 repository:
     path: github.com/spagno/iscdhcpd_exporter
 build:
@@ -10,7 +10,7 @@ build:
         -X github.com/prometheus/common/version.Revision={{.Revision}}
         -X github.com/prometheus/common/version.Branch={{.Branch}}
         -X github.com/prometheus/common/version.BuildUser={{user}}@{{host}}
-        -X github.com/prometheus/common/version.BuildDate={{date "20180826-05:18:05"}}
+        -X github.com/prometheus/common/version.BuildDate={{date "20220809-05:18:05"}}
 tarball:
     files:
         - LICENSE

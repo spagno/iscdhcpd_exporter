@@ -26,8 +26,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/version"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -295,7 +295,6 @@ func init() {
 }
 
 func main() {
-	log.AddFlags(kingpin.CommandLine)
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
 
